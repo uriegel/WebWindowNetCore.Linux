@@ -1,8 +1,9 @@
 ﻿namespace WebWindowNetCore;
 using GtkDotNet;
-public static class Program
+public class WebWindow : IWebWindow
 {
-    public static void Execute()
+    public void Initialize(Configuration configuration) => this.configuration = configuration;
+    public void Execute()
     {
         var app = new Application("de.uriegel.test");
         var ret = app.Run(() => 
@@ -11,12 +12,14 @@ public static class Program
             var webView = new WebView();
             var window = new Window();
             window.Add(webView);
-            webView.LoadUri("https://www.microsoft.com");
+            webView.LoadUri(configuration.Url);
             webView.Settings.EnableDeveloperExtras = true;
             app.AddWindow(window);
-            window.SetTitle("Web View 😎😎👌");
+            window.SetTitle(configuration.Title);
             window.SetDefaultSize(800, 600);
             window.ShowAll();
         });
     }
+
+    Configuration? configuration;
 }
