@@ -5,14 +5,13 @@ using GtkDotNet;
 
 public abstract class WebWindowBase
 {
-    protected record Settings(int x, int y, int width, int height, bool isMaximized);
+    public record Settings(int X, int Y, int Width, int Height, bool IsMaximized);
 
     public WebWindowBase(Configuration configuration) 
         => this.configuration = configuration;
 
     public void Execute()
     {
-
         var settings = new Settings(configuration.InitialPosition?.X ?? -1, configuration.InitialPosition?.Y ?? -1, 
             configuration.InitialSize?.Width ?? 800, configuration.InitialSize?.Height ?? 600, configuration.IsMaximized == true);
 
@@ -41,7 +40,7 @@ public abstract class WebWindowBase
 
     protected abstract void Run(Settings settings);
 
-    protected void SaveSettings(Settings settings)
+    protected void SaveSettings(WebWindowBase.Settings settings)
     {
         var json = JsonSerializer.Serialize(settings);
         using var writer = new StreamWriter(File.Create(settingsFile));
@@ -62,9 +61,7 @@ public class WebWindow : WebWindowBase
     // TODO: Events
     // TODO: Show Dev Tools
     // TODO: Show Fullscreen
-    // TODO: Maximize, end program, restart restore: wrong size
-        
-
+    
     public WebWindow(Configuration configuration) : base(configuration) {}
     protected override void Run(Settings settings)
     {
@@ -72,7 +69,6 @@ public class WebWindow : WebWindowBase
         // TODO: In Gtk set progress from background thread
 
         var app = new Application(configuration.Organization);
-        var isMaximizted = false;
         var ret = app.Run(() => 
         {
             app.EnableSynchronizationContext();
@@ -83,11 +79,12 @@ public class WebWindow : WebWindowBase
             webView.Settings.EnableDeveloperExtras = true;
             app.AddWindow(window);
             window.SetTitle(configuration.Title);
-            window.SetDefaultSize(settings.width, settings.height);
-            window.Move(settings.x, settings.y);
-            if (settings.isMaximized)
+            window.SetDefaultSize(settings.Width, settings.Height);
+            window.Move(settings.X, settings.Y);
+            if (settings.IsMaximized)
                 window.Maximize();
-            
+
+            var recentSettings = settings;            
             if (configuration.SaveWindowSettings == true)
             {
                 window.Delete += (s, _) =>
@@ -96,24 +93,19 @@ public class WebWindow : WebWindowBase
                     {
                         var (w, h) = win.Size;
                         var (x, y) = win.GetPosition();
-                        SaveSettings(new Settings(x, y, w, h, window.IsMaximized()));
+                        if (window.IsMaximized())
+                            SaveSettings(recentSettings with { IsMaximized = true});
+                        else
+                            SaveSettings(new Settings(x, y, w, h, false));
                     }
                 };
                 window.Configure += (s, e) => 
                 {
-                    if (isMaximizted != window.IsMaximized())
+                    if (!window.IsMaximized() && s is Window win)
                     {
-                        isMaximizted = window.IsMaximized();
-                        if (isMaximizted)
-                        {
-                            var (x, y) = window.GetPosition();
-                            Console.WriteLine($"Speicher {e.Width} {e.Height} {window.IsMaximized()}");                
-                        }
-                    }
-                    else if (window.IsMaximized())
-                    {
-                        isMaximizted = window.IsMaximized();
-                        Console.WriteLine($"Configure {e.Width} {e.Height} {window.IsMaximized()}");                
+                        var (x, y) = win.GetPosition();
+                        var (w, h) = win.Size;
+                        recentSettings = new Settings(x, y, w, h, false);
                     }
                 };
             }
