@@ -1,28 +1,20 @@
 ﻿namespace WebWindowNetCore;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 using GtkDotNet;
 
-public class WebWindow : IWebWindow
+public abstract class WebWindowBase
 {
-    // TODO: Resource loading
-    // TODO: Resource homepage per ResourceStrings
-    // TODO: Drag and Drop internal
-    // TODO: Drag and Drop Files
-    // TODO: Events
-        
-    record Settings(int x, int y, int width, int height, bool isMaximized);
+    protected record Settings(int x, int y, int width, int height, bool isMaximized);
 
-    public void Initialize(Configuration configuration) => this.configuration = configuration ?? new Configuration();
+    public WebWindowBase(Configuration configuration) 
+        => this.configuration = configuration;
+
     public void Execute()
     {
-        // TODO: Commander mit Menu versteckbar
-        // TODO: In Gtk set progress from background thread
 
         var settings = new Settings(configuration.InitialPosition?.X ?? -1, configuration.InitialPosition?.Y ?? -1, 
             configuration.InitialSize?.Width ?? 800, configuration.InitialSize?.Height ?? 600, configuration.IsMaximized == true);
-        var settingsFile = "";
 
         if (configuration.SaveWindowSettings == true)
         {
@@ -43,7 +35,41 @@ public class WebWindow : IWebWindow
                         settings = s;
                 }
             }
-        }
+        }  
+        Run(settings);
+    }
+
+    protected abstract void Run(Settings settings);
+
+    protected void SaveSettings(Settings settings)
+    {
+        var json = JsonSerializer.Serialize(settings);
+        using var writer = new StreamWriter(File.Create(settingsFile));
+        writer.Write(json);
+    }
+
+    protected Configuration configuration;
+    string settingsFile = "";      
+}
+
+public class WebWindow : WebWindowBase
+{
+    // TODO: Resource loading
+    // TODO: Resource loading glade file
+    // TODO: Resource homepage per ResourceStrings
+    // TODO: Drag and Drop internal
+    // TODO: Drag and Drop Files
+    // TODO: Events
+    // TODO: Show Dev Tools
+    // TODO: Show Fullscreen
+    // TODO: Maximize, end program, restart restore: wrong size
+        
+
+    public WebWindow(Configuration configuration) : base(configuration) {}
+    protected override void Run(Settings settings)
+    {
+        // TODO: Commander mit Menu versteckbar
+        // TODO: In Gtk set progress from background thread
 
         var app = new Application(configuration.Organization);
         var isMaximizted = false;
@@ -70,10 +96,7 @@ public class WebWindow : IWebWindow
                     {
                         var (w, h) = win.Size;
                         var (x, y) = win.GetPosition();
-                        var settings = new Settings(x, y, w, h, window.IsMaximized());
-                        var json = JsonSerializer.Serialize(settings);
-                        using var writer = new StreamWriter(File.Create(settingsFile));
-                        writer.Write(json);
+                        SaveSettings(new Settings(x, y, w, h, window.IsMaximized()));
                     }
                 };
                 window.Configure += (s, e) => 
@@ -97,6 +120,4 @@ public class WebWindow : IWebWindow
             window.ShowAll();
         });
     }
-
-    Configuration configuration = new Configuration();
 }
