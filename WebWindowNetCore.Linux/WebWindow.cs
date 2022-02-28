@@ -53,8 +53,7 @@ public abstract class WebWindowBase
 
 public class WebWindow : WebWindowBase
 {
-    // TODO: Resource loading
-    // TODO: Resource loading ini File
+    // TODO: Resource loading icon File (Windows, linux via glade and via gtk_window_set_icon from resource)
     // TODO: Resource loading glade file
     // TODO: (Resource homepage per ResourceStrings)
     // TODO: Drag and Drop internal
@@ -62,13 +61,12 @@ public class WebWindow : WebWindowBase
     // TODO: Events to main Program
     // TODO: Show Dev Tools
     // TODO: Show Fullscreen
+    // TODO: Access Windows Form | Gtk App / Window / webview
+    // TODO: In Gtk set progress from background thread
     
     public WebWindow(Configuration configuration) : base(configuration) {}
     protected override void Run(Settings settings)
     {
-        // TODO: Commander mit Menu versteckbar
-        // TODO: In Gtk set progress from background thread
-
         var app = new Application(configuration.Organization);
         var ret = app.Run(() => 
         {
