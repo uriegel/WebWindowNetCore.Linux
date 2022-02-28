@@ -54,11 +54,12 @@ public abstract class WebWindowBase
 public class WebWindow : WebWindowBase
 {
     // TODO: Resource loading
+    // TODO: Resource loading ini File
     // TODO: Resource loading glade file
-    // TODO: Resource homepage per ResourceStrings
+    // TODO: (Resource homepage per ResourceStrings)
     // TODO: Drag and Drop internal
     // TODO: Drag and Drop Files
-    // TODO: Events
+    // TODO: Events to main Program
     // TODO: Show Dev Tools
     // TODO: Show Fullscreen
     
