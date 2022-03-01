@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebWindowNetCore.Linux", "WebWindowNetCore.Linux\WebWindowNetCore.Linux.csproj", "{EBE5EF86-6003-42C8-B630-EFD9C02D9A27}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestGladeApp", "TestGladeApp\TestGladeApp.csproj", "{A8D2108C-45D8-4DA0-8331-EFA15A7252CE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{EBE5EF86-6003-42C8-B630-EFD9C02D9A27}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EBE5EF86-6003-42C8-B630-EFD9C02D9A27}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EBE5EF86-6003-42C8-B630-EFD9C02D9A27}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8D2108C-45D8-4DA0-8331-EFA15A7252CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8D2108C-45D8-4DA0-8331-EFA15A7252CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8D2108C-45D8-4DA0-8331-EFA15A7252CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8D2108C-45D8-4DA0-8331-EFA15A7252CE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -58,28 +58,32 @@ public abstract class WebWindowBase
 
 public class WebWindow : WebWindowBase
 {
-    // TODO: Resource loading icon File (Windows)
-    // TODO: Resource loading glade file
-    // TODO: (Resource homepage per ResourceStrings)
+    // TODO: Show Dev Tools
+    // TODO: Show Fullscreen
     // TODO: Drag and Drop internal
     // TODO: Drag and Drop Files
     // TODO: Events to main Program
-    // TODO: Show Dev Tools
-    // TODO: Show Fullscreen
-    // TODO: Access Windows Form | Gtk App / Window / webview
     // TODO: In Gtk set progress from background thread
     
     public WebWindow(Configuration configuration) : base(configuration) {}
+    
+    public event EventHandler BeforeWindowCreating;
+
+    public Application GetApplication() => app;
+    public void CreateWindow(Window window) => this.window = window;
+
     protected override void Run(Settings settings)
     {
         var schema = String.Join('.', configuration.Organization.Split('.').Reverse());
-        var app = new Application(schema);
+        app = new Application(schema);
         var withResources = app.RegisterResources();
         var ret = app.Run(() => 
         {
             app.EnableSynchronizationContext();
+            BeforeWindowCreating(this, EventArgs.Empty);
             var webView = new WebView();
-            var window = new Window();
+            if (window == null)
+                window = new Window();
             window.Add(webView);
             webView.LoadUri(configuration.Url);
             webView.Settings.EnableDeveloperExtras = true;
@@ -120,4 +124,7 @@ public class WebWindow : WebWindowBase
             window.ShowAll();
         });
     }
+
+    Application app;
+    Window? window = null;
 }
