@@ -5,6 +5,11 @@ using GtkDotNet;
 
 public abstract class WebWindowBase
 {
+    JsonSerializerOptions serializeOptions = new JsonSerializerOptions
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    };
+
     public record Settings(int X, int Y, int Width, int Height, bool IsMaximized);
 
     public WebWindowBase(Configuration configuration) 
@@ -29,7 +34,7 @@ public abstract class WebWindowBase
                 var settingsString = reader.ReadToEnd();
                 if (settingsString?.Length > 0)
                 {
-                    var s = JsonSerializer.Deserialize<Settings>(settingsString);
+                    var s = JsonSerializer.Deserialize<Settings>(settingsString, serializeOptions);
                     if (s != null)
                         settings = s;
                 }
@@ -42,7 +47,7 @@ public abstract class WebWindowBase
 
     protected void SaveSettings(WebWindowBase.Settings settings)
     {
-        var json = JsonSerializer.Serialize(settings);
+        var json = JsonSerializer.Serialize(settings, serializeOptions);
         using var writer = new StreamWriter(File.Create(settingsFile));
         writer.Write(json);
     }
@@ -53,7 +58,7 @@ public abstract class WebWindowBase
 
 public class WebWindow : WebWindowBase
 {
-    // TODO: Resource loading icon File (Windows, linux via glade and via gtk_window_set_icon from resource)
+    // TODO: Resource loading icon File (Windows)
     // TODO: Resource loading glade file
     // TODO: (Resource homepage per ResourceStrings)
     // TODO: Drag and Drop internal
@@ -67,7 +72,9 @@ public class WebWindow : WebWindowBase
     public WebWindow(Configuration configuration) : base(configuration) {}
     protected override void Run(Settings settings)
     {
-        var app = new Application(configuration.Organization);
+        var schema = String.Join('.', configuration.Organization.Split('.').Reverse());
+        var app = new Application(schema);
+        var withResources = app.RegisterResources();
         var ret = app.Run(() => 
         {
             app.EnableSynchronizationContext();
@@ -108,6 +115,8 @@ public class WebWindow : WebWindowBase
                     }
                 };
             }
+            if (withResources)
+                window.SetIconFromResource($"/{schema.Replace('.', '/')}/appicon.png");
             window.ShowAll();
         });
     }
