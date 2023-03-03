@@ -1,4 +1,4 @@
-﻿using WebWindow;
+﻿using WebWindowNetCore.Linux;
 
 static class Program
 {

@@ -1,6 +1,6 @@
 ﻿using GtkDotNet;
 
-namespace WebWindow;
+namespace WebWindowNetCore.Linux;
 
 public static class WebViewApp
 {
