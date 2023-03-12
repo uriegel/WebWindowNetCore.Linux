@@ -1,4 +1,3 @@
 # WebWindowNetCore.Linux
 
-## Specifying an application icon
-An application icon has to be added in Resource. Its name must be ```appicon.png```
+Dependencies for Linux for package [WebWindowNetCore](https://github.com/uriegel/WebWindowNetCore/blob/master/README.md). Please look there for further information.
