@@ -5,13 +5,13 @@
   	<RuntimeIdentifier>linux-x64</RuntimeIdentifier>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>1.0.0</Version>
-    <FileVersion>1.0.0.0</FileVersion>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <Version>1.0.1</Version>
+    <FileVersion>1.0.1.0</FileVersion>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
     <Authors>Uwe Riegel</Authors>
     <Company>Uwe Riegel</Company>
     <Copyright>Uwe Riegel</Copyright>
-    <Description>A C# Webview Application for Windows to Electron based on WebView2</Description>
+    <Description>A C# Webview Application for Linux similar to Electron based on GTK WebKit</Description>
     <PackageLicenseUrl>
     </PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/uriegel/WebWindowNetCore.Linux</PackageProjectUrl>
