@@ -33,6 +33,17 @@ public class WebView : WebWindowNetCore.WebView
                 webView.LoadUri(settings?.Url);
             if (settings?.DevTools == true)
                 webView.Settings.EnableDeveloperExtras = true;
+            if (settings?.HttpSettings?.WebrootUrl != null)
+            {
+#if DEBUG
+                var uri = string.IsNullOrEmpty(settings?.DebugUrl)
+                    ? $"http://localhost:{settings?.HttpSettings?.Port ?? 80}{settings?.HttpSettings?.WebrootUrl}/{settings?.HttpSettings?.DefaultHtml}"
+                    : settings?.DebugUrl;
+#else
+                var uri = $"http://localhost:{settings?.HttpSettings?.Port ?? 80}{settings?.HttpSettings?.WebrootUrl}/{settings?.HttpSettings?.DefaultHtml}";
+#endif
+                webView.LoadUri(uri);
+            }
             app.AddWindow(window);
             window.SetTitle(settings?.Title);
             window.SetSizeRequest(200, 200);
@@ -43,14 +54,14 @@ public class WebView : WebWindowNetCore.WebView
             {
                 var w = settings?.Width;
                 var h = settings?.Height;
+                var showDevTools = settings?.DevTools == true;
+                var withFetch = (settings?.HttpSettings?.RequestDelegates?.Length ?? 0) > 0;
                 webView.LoadChanged += (s, e) =>
                 {
                     if (e.LoadEvent == WebKitLoadEvent.WEBKIT_LOAD_COMMITTED)
+                    {
                         webView.RunJavascript(
                         """ 
-                            const devTools = document.getElementById('devTools')
-                            devTools.onclick = () => alert(JSON.stringify({action: 1}))
-
                             const bounds = JSON.parse(localStorage.getItem('window-bounds') || '{}')
                             const isMaximized = localStorage.getItem('isMaximized')
                             if (bounds.width && bounds.height)
@@ -58,6 +69,29 @@ public class WebView : WebWindowNetCore.WebView
                             else
                                 alert(JSON.stringify({action: 2}))
                         """);
+                        if (showDevTools == true)
+                            webView.RunJavascript(
+                            """ 
+                                function webViewShowDevTools() {
+                                    alert(JSON.stringify({action: 1}))
+                                }
+                            """);
+                        if (withFetch)
+                            webView.RunJavascript(
+                            """ 
+                                async function webViewRequest(method, input) {
+
+                                    const msg = {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify(input)
+                                    }
+
+                                    const response = await fetch(`/request/${method}`, msg) 
+                                    return await response.json() 
+                                }
+                            """);
+                    }
                 };
 
                 window.Configure += (s, e) =>

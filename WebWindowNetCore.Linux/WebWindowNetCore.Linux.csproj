@@ -21,12 +21,17 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>    
     <LangVersion>Preview</LangVersion>    
+    <NoWarn>CS1591</NoWarn>      
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="GtkDotNet" Version="5.10.0" />
-    <PackageReference Include="WebWindowNetCore" Version="0.0.1-alpha.8" />
+    <PackageReference Include="WebWindowNetCore" Version="0.0.1-alpha.12" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+  </PropertyGroup>
 
   <ItemGroup>
     <None Include="..\README.md" Pack="true" PackagePath="\" />
