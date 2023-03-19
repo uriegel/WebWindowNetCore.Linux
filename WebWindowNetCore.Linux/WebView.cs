@@ -2,7 +2,6 @@ using GtkDotNet;
 using WebWindowNetCore.Data;
 using System.Text.Json;
 using LinqTools;
-using WebWindowNetCore;
 
 namespace WebWindowNetCore;
 
@@ -16,6 +15,8 @@ record ScriptAction(Action Action, int? Width, int? Height, bool? IsMaximized);
 
 public class WebView : WebWindowNetCore.Base.WebView
 {
+    public static Application? GtkApplication { get; private set; }
+
     public static WebViewBuilder Create()
         => new WebViewBuilder();
 
@@ -24,6 +25,7 @@ public class WebView : WebWindowNetCore.Base.WebView
             .Run(app =>
             {
             app.EnableSynchronizationContext();
+            GtkApplication = app;
 
             GtkDotNet.Timer? timer = null;
             saveBounds = settings?.SaveBounds == true;
