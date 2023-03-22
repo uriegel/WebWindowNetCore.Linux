@@ -2,6 +2,7 @@ using GtkDotNet;
 using WebWindowNetCore.Data;
 using System.Text.Json;
 using LinqTools;
+using System.Diagnostics;
 
 namespace WebWindowNetCore;
 
@@ -34,24 +35,21 @@ public class WebView : WebWindowNetCore.Base.WebView
             var webView = new GtkDotNet.WebView();
             window.Add(webView);
             webView.Settings.EnableDeveloperExtras = true;
-            if (settings?.Url != null)
-                webView.LoadUri(settings?.Url);
             if (settings?.DevTools == true)
                 webView.Settings.EnableDeveloperExtras = true;
-            if (settings?.HttpSettings?.WebrootUrl != null)
-            {
-#if DEBUG
-                var uri = string.IsNullOrEmpty(settings?.DebugUrl)
-                    ? $"http://localhost:{settings?.HttpSettings?.Port ?? 80}{settings?.HttpSettings?.WebrootUrl}/{settings?.HttpSettings?.DefaultHtml}"
-                    : settings?.DebugUrl;
-#else
-                var uri = $"http://localhost:{settings?.HttpSettings?.Port ?? 80}{settings?.HttpSettings?.WebrootUrl}/{settings?.HttpSettings?.DefaultHtml}";
-#endif
-                webView.LoadUri(uri);
-            }
+
+            var url = Debugger.IsAttached && !string.IsNullOrEmpty(settings?.DebugUrl)
+                ? settings?.DebugUrl
+                : settings?.Url != null
+                ? settings.Url
+                : $"http://localhost:{settings?.HttpSettings?.Port ?? 80}{settings?.HttpSettings?.WebrootUrl}/{settings?.HttpSettings?.DefaultHtml}";
+            webView.LoadUri(url + settings?.Query ?? "");
+
             app.AddWindow(window);
             window.SetTitle(settings?.Title);
             window.SetSizeRequest(200, 200);
+            if (settings?.ResourceIcon != null)
+                window.SetIconFromCSharpResource(settings?.ResourceIcon);
             window.SetDefaultSize(settings!.Width, settings!.Height);
             if (!saveBounds)
                 window.ShowAll();
@@ -59,12 +57,30 @@ public class WebView : WebWindowNetCore.Base.WebView
             {
                 var w = settings?.Width;
                 var h = settings?.Height;
-                var showDevTools = settings?.DevTools == true;
-                var withFetch = (settings?.HttpSettings?.RequestDelegates?.Length ?? 0) > 0;
-                webView.LoadChanged += (s, e) =>
+                window.Configure += (s, e) =>
                 {
-                    if (e.LoadEvent == WebKitLoadEvent.WEBKIT_LOAD_COMMITTED)
+                    timer?.Dispose();
+                    timer = new(() =>
                     {
+                        if (!window.IsMaximized())
+                            webView.RunJavascript(
+                                $$"""
+                                localStorage.setItem('window-bounds', JSON.stringify({width: {{e.Width}}, height: {{e.Height}}}))
+                                localStorage.setItem('isMaximized', false)
+                            """);
+                        else
+                            webView.RunJavascript($"localStorage.setItem('isMaximized', true)");
+                    }, TimeSpan.FromMilliseconds(400), Timeout.InfiniteTimeSpan);
+                };
+            }
+            
+            var showDevTools = settings?.DevTools == true;
+            var withFetch = (settings?.HttpSettings?.RequestDelegates?.Length ?? 0) > 0;
+            webView.LoadChanged += (s, e) =>
+            {
+                if (e.LoadEvent == WebKitLoadEvent.WEBKIT_LOAD_COMMITTED)
+                {
+                    if (saveBounds)
                         webView.RunJavascript(
                         """ 
                             const bounds = JSON.parse(localStorage.getItem('window-bounds') || '{}')
@@ -74,47 +90,30 @@ public class WebView : WebWindowNetCore.Base.WebView
                             else
                                 alert(JSON.stringify({action: 2}))
                         """);
-                        if (showDevTools == true)
-                            webView.RunJavascript(
-                            """ 
-                                function webViewShowDevTools() {
-                                    alert(JSON.stringify({action: 1}))
+                    if (showDevTools == true)
+                        webView.RunJavascript(
+                        """ 
+                            function webViewShowDevTools() {
+                                alert(JSON.stringify({action: 1}))
+                            }
+                        """);
+                    if (withFetch)
+                        webView.RunJavascript(
+                        """ 
+                            async function webViewRequest(method, input) {
+
+                                const msg = {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(input)
                                 }
-                            """);
-                        if (withFetch)
-                            webView.RunJavascript(
-                            """ 
-                                async function webViewRequest(method, input) {
 
-                                    const msg = {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify(input)
-                                    }
-
-                                    const response = await fetch(`/request/${method}`, msg) 
-                                    return await response.json() 
-                                }
-                            """);
-                    }
-                };
-
-                window.Configure += (s, e) =>
-                {
-                    timer?.Dispose();
-                    timer = new(() => 
-                    {
-                        if (!window.IsMaximized())
-                            webView.RunJavascript(
-                                $$"""
-                                    localStorage.setItem('window-bounds', JSON.stringify({width: {{e.Width}}, height: {{e.Height}}}))
-                                    localStorage.setItem('isMaximized', false)
-                                """);
-                        else
-                            webView.RunJavascript($"localStorage.setItem('isMaximized', true)");
-                    }, TimeSpan.FromMilliseconds(400), Timeout.InfiniteTimeSpan);
-                };
-            }
+                                const response = await fetch(`/request/${method}`, msg) 
+                                return await response.json() 
+                            }
+                        """);
+                }
+            };
 
             webView.ScriptDialog += (s, e) =>
             {

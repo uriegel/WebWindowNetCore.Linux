@@ -10,6 +10,7 @@ WebView
     .InitialBounds(600, 800)
     .ResourceIcon("icon")
     .Title("Commander")
+    .QueryString("?theme=windows")
     .SaveBounds()
     .DebugUrl("http://localhost:3000")
     //.Url($"file://{Directory.GetCurrentDirectory()}/webroot/index.html")
