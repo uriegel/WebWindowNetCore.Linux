@@ -1,5 +1,5 @@
-﻿using AspNetExtensions;
-using LinqTools;
+﻿using LinqTools;
+using AspNetExtensions;
 using WebWindowNetCore;
 
 var sseEventSource = WebView.CreateEventSource<Event>();
@@ -10,7 +10,7 @@ WebView
     .InitialBounds(600, 800)
     .ResourceIcon("icon")
     .Title("Commander")
-    .QueryString("?theme=windows")
+    //.QueryString("?theme=windows")
     .SaveBounds()
     .DebugUrl("http://localhost:3000")
     //.Url($"file://{Directory.GetCurrentDirectory()}/webroot/index.html")
