@@ -119,41 +119,8 @@ public class WebView : WebWindowNetCore.Base.WebView
     internal WebView(WebViewBuilder builder)
         => settings = builder.Data;
 
-    readonly Func<System.Action, GtkDotNet.Timer> timerState = State.Use<System.Action, GtkDotNet.Timer>((action, t) =>
-            {
-                t?.Dispose();
-                return new(action, TimeSpan.FromMilliseconds(400), Timeout.InfiniteTimeSpan);
-            });
-
     delegate bool CloseDelegate(IntPtr z1, IntPtr z2);
-    
-    WebViewSettings? settings;
+
+    readonly WebViewSettings? settings;
 }
 
-static class Schrott
-{
-    public static T SideEffectIf<T>(this T t, bool condition, Action<T> action)
-    {
-        if (condition)
-            action(t);
-        return t;
-    }
-    public static T SideEffectChoose<T>(this T t, bool condition, Action<T> trueAction, Action<T> falseAction)
-    {
-        if (condition)
-            trueAction(t);
-        else
-            falseAction(t);
-        return t;
-    }
-}
-
-public static class State
-{
-    public static Func<P, T> Use<P, T>(Func<P, T?, T> change, T? seed = default)
-        where T : class
-    {
-        var t = seed;
-        return p => t = change(p, t);
-    }
-}
