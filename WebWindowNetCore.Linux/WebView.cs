@@ -42,7 +42,7 @@ public class WebView : WebWindowNetCore.Base.WebView
                                                         : settings?.Url != null
                                                         ? settings.Url
                                                         : $"http://localhost:{settings?.HttpSettings?.Port ?? 80}{settings?.HttpSettings?.WebrootUrl}/{settings?.HttpSettings?.DefaultHtml}")
-                                                            + settings?.Query ?? ""))
+                                                            + settings?.Query ?? settings?.GetQuery?.Invoke() ?? ""))
                         .SideEffect(wk => Gtk.SignalConnect<TwoIntPtr>(wk, "script-dialog", (_, d) =>
                             {
                                 var msg = WebKit.ScriptDialogGetMessage(d);
@@ -99,6 +99,7 @@ public class WebView : WebWindowNetCore.Base.WebView
                                                     return await response.json() 
                                                 }
                                             """);
+                                    settings?.OnStarted?.Invoke();
                                 }
                             }))
 
