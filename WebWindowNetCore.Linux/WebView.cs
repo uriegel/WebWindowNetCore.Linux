@@ -2,7 +2,6 @@ using GtkDotNet;
 using WebWindowNetCore.Data;
 using LinqTools;
 using System.Diagnostics;
-using CsTools.Functional;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 
@@ -12,9 +11,11 @@ enum Action
 {
     DevTools = 1,
     Show,
+    Maximize,
+    StartDrag
 }
 
-record ScriptAction(Action Action, int? Width, int? Height, bool? IsMaximized);
+record ScriptAction(Action Action, int? Width, int? Height, bool? IsMaximized, string[]? FileList);
 
 public class WebView : WebWindowNetCore.Base.WebView
 {
@@ -65,12 +66,47 @@ public class WebView : WebWindowNetCore.Base.WebView
                                             Window.Maximize(w);
                                         Widget.Show(w);
                                         break;
+                                    case Action.StartDrag:
+                                        {
+                                            w.StartDrag(DragActions.Copy | DragActions.Move);
+                                            DragDataGetEventFunc dragGet = (w, c, selectionData, info, time, _) =>
+                                                selectionData.DataSetUris(action.FileList);
+                                            var dragEnd = new RefCell<ThreeIntPtr>();
+                                            dragEnd.Value = (_, __, ___) =>
+                                            {
+                                                w.SignalDisconnect("drag-data-get", dragGet);
+                                                w.SignalDisconnect("drag-end", dragEnd.Value);
+                                                WebKit.RunJavascript(wk,
+                                                    """ 
+                                                        webViewRegisterDragEndCb()
+                                                    """);                                                        
+                                            };
+                                            w.SignalConnect("drag-data-get", dragGet);
+                                            w.SignalConnect("drag-end", dragEnd.Value);
+                                        }
+                                        break;
                                 }
                             }))
                         .SideEffect(wk => Gtk.SignalConnect<TwoIntPtr>(wk, "load-changed", (_, e) =>
                             {
+                                WebKit.RunJavascript(wk,
+                                    """ 
+                                        const webViewDragStart = fileList => alert(JSON.stringify({action: 4, fileList}))
+                                        const webViewRegisterDragEnd = cb => webViewRegisterDragEndCb = cb
+                                        var webViewRegisterDragEndCb
+                                    """);
                                 if ((WebKitLoadEvent)e == WebKitLoadEvent.WEBKIT_LOAD_COMMITTED)
                                 {
+                                    WebKit.RunJavascript(wk,
+                                        """ 
+                                            const bounds = JSON.parse(localStorage.getItem('window-bounds') || '{}')
+                                            const isMaximized = localStorage.getItem('isMaximized')
+                                            if (bounds.width && bounds.height)
+                                                alert(JSON.stringify({action: 2, width: bounds.width, height: bounds.height, isMaximized: isMaximized == 'true'}))
+                                            else
+                                                alert(JSON.stringify({action: 2}))
+                                        """);
+
                                     if (settings?.SaveBounds == true)
                                         WebKit.RunJavascript(wk,
                                             """ 
@@ -127,8 +163,16 @@ public class WebView : WebWindowNetCore.Base.WebView
     internal WebView(WebViewBuilder builder)
         => settings = builder.Data;
 
+    delegate void DragDataGetEventFunc(IntPtr widget, IntPtr context, IntPtr selectionData, int info, int time, IntPtr _);
     delegate bool CloseDelegate(IntPtr widget, IntPtr z2, IntPtr z3);
     delegate bool BoolFunc();
     readonly WebViewSettings? settings;
 }
 
+class RefCell<T>
+{
+    public T? Value;
+
+    public RefCell() {}
+    public RefCell(T? value) => Value = value;
+}
