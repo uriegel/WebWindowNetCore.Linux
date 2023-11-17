@@ -24,6 +24,7 @@ public class WebView : WebWindowNetCore.Base.WebView
         => Application.Run(gtkId, app =>
             Application
                 .NewWindow(app)
+                .SideEffect(_ => Application.EnableSynchronizationContext())
                 .SideEffect(w => w.SetTitle(settings?.Title))
                 .SideEffect(w => w.SetDefaultSize(settings!.Width, settings!.Height))
                 .SideEffectIf(settings?.ResourceIcon != null,
@@ -37,12 +38,14 @@ public class WebView : WebWindowNetCore.Base.WebView
                                 .SideEffectIf(settings?.DevTools == true,
                                     s => s.SetBool("enable-developer-extras", true))
                         )
+                        .SideEffectIf(settings?.DefaultContextMenuEnabled != true,
+                            wk => wk.SignalConnect<BoolFunc>("context-menu", () => true))
                         .SideEffect(wk => wk.LoadUri((Debugger.IsAttached && !string.IsNullOrEmpty(settings?.DebugUrl)
                                                         ? settings?.DebugUrl
                                                         : settings?.Url != null
                                                         ? settings.Url
                                                         : $"http://localhost:{settings?.HttpSettings?.Port ?? 80}{settings?.HttpSettings?.WebrootUrl}/{settings?.HttpSettings?.DefaultHtml}")
-                                                            + settings?.Query ?? settings?.GetQuery?.Invoke() ?? ""))
+                                                            + (settings?.Query ?? settings?.GetQuery?.Invoke())))
                         .SideEffect(wk => Gtk.SignalConnect<TwoIntPtr>(wk, "script-dialog", (_, d) =>
                             {
                                 var msg = WebKit.ScriptDialogGetMessage(d);
@@ -121,7 +124,7 @@ public class WebView : WebWindowNetCore.Base.WebView
         => settings = builder.Data;
 
     delegate bool CloseDelegate(IntPtr z1, IntPtr z2);
-
+    delegate bool BoolFunc();
     readonly WebViewSettings? settings;
 }
 

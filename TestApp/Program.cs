@@ -1,6 +1,7 @@
 ﻿using LinqTools;
 using AspNetExtensions;
 using WebWindowNetCore;
+using GtkDotNet;
 
 var sseEventSource = WebView.CreateEventSource<Event>();
 StartEvents(sseEventSource.Send);
@@ -10,11 +11,12 @@ WebView
     .InitialBounds(600, 800)
     .ResourceIcon("icon")
     .Title("Commander")
-    .QueryString(() => "?theme=windows")
+    .QueryString(() => $"?theme={Application.Dispatch(() => GtkSettings.GetDefault().GetString("gtk-theme-name")).Result}")
     .SaveBounds()
+    .DefaultContextMenuEnabled()
     .OnStarted(() => Console.WriteLine("Now started"))
-    .DebugUrl("http://localhost:3000")
-    //.Url($"file://{Directory.GetCurrentDirectory()}/webroot/index.html")
+    //.DebugUrl("http://localhost:3000")
+    .Url($"file://{Directory.GetCurrentDirectory()}/webroot/index.html")
     .ConfigureHttp(http => http
         .ResourceWebroot("webroot", "/web")
         .UseSse("sse/test", sseEventSource)
