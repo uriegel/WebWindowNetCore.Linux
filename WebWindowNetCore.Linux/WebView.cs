@@ -105,25 +105,29 @@ public class WebView : WebWindowNetCore.Base.WebView
                                     settings?.OnStarted?.Invoke();
                                 }
                             }))
+                        .SideEffectIf(settings?.SaveBounds == true,
+                            wk => w.SideEffect(_ => w.SignalConnectAfter<CloseDelegate>("delete-event", (___, _, __) =>
+                                false
+                                    .SideEffectChoose(Window.IsMaximized(w) == false,
+                                        _ => { WebKit.RunJavascript(wk,
+                                            $$"""
+                                                localStorage.setItem('window-bounds', JSON.stringify({width: {{w.GetWidth()}}, height: {{w.GetHeight()}}}))
+                                                localStorage.setItem('isMaximized', false)
+                                            """);},
+                                    _ => { WebKit.RunJavascript(wk, $"localStorage.setItem('isMaximized', true)"); }
 
-                ))
-                .SideEffectChoose(settings?.SaveBounds == true,
-                    w => w.SideEffect(da => da.SignalConnectAfter<CloseDelegate>("close-request", (_, __) =>
-                        false.SideEffectChoose(Window.IsMaximized(w) == false,
-                            _ => WebKit.RunJavascript(w.GetFirstChild(),
-                                    $$"""
-                                        localStorage.setItem('window-bounds', JSON.stringify({width: {{w.GetWidth()}}, height: {{w.GetHeight()}}}))
-                                        localStorage.setItem('isMaximized', false)
-                                    """),
-                            _ => WebKit.RunJavascript(w.GetFirstChild(), $"localStorage.setItem('isMaximized', true)")
-                        ))),
-                    w => w.Show()
-                ));
+
+                                )))
+                        ))
+                )
+                .SideEffectIf(settings?.SaveBounds != true,
+                    w => w.Show())
+            );
 
     internal WebView(WebViewBuilder builder)
         => settings = builder.Data;
 
-    delegate bool CloseDelegate(IntPtr z1, IntPtr z2);
+    delegate bool CloseDelegate(IntPtr widget, IntPtr z2, IntPtr z3);
     delegate bool BoolFunc();
     readonly WebViewSettings? settings;
 }
