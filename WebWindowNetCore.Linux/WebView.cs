@@ -70,7 +70,7 @@ public class WebView : WebWindowNetCore.Base.WebView
                                         {
                                             w.StartDrag(DragActions.Copy | DragActions.Move);
                                             DragDataGetEventFunc dragGet = (w, c, selectionData, info, time, _) =>
-                                                selectionData.DataSetUris(action.FileList);
+                                                selectionData.DataSetUris2(action.FileList?.Select(n => "file://" + n).ToArray());
                                             var dragEnd = new RefCell<ThreeIntPtr>();
                                             dragEnd.Value = (_, __, ___) =>
                                             {
@@ -89,14 +89,14 @@ public class WebView : WebWindowNetCore.Base.WebView
                             }))
                         .SideEffect(wk => Gtk.SignalConnect<TwoIntPtr>(wk, "load-changed", (_, e) =>
                             {
-                                WebKit.RunJavascript(wk,
-                                    """ 
-                                        const webViewDragStart = fileList => alert(JSON.stringify({action: 4, fileList}))
-                                        const webViewRegisterDragEnd = cb => webViewRegisterDragEndCb = cb
-                                        var webViewRegisterDragEndCb
-                                    """);
                                 if ((WebKitLoadEvent)e == WebKitLoadEvent.WEBKIT_LOAD_COMMITTED)
                                 {
+                                    WebKit.RunJavascript(wk,
+                                        """ 
+                                            const webViewDragStart = fileList => alert(JSON.stringify({action: 4, fileList}))
+                                            const webViewRegisterDragEnd = cb => webViewRegisterDragEndCb = cb
+                                            var webViewRegisterDragEndCb
+                                        """);
                                     WebKit.RunJavascript(wk,
                                         """ 
                                             const bounds = JSON.parse(localStorage.getItem('window-bounds') || '{}')
@@ -175,4 +175,18 @@ class RefCell<T>
 
     public RefCell() {}
     public RefCell(T? value) => Value = value;
+}
+
+public static class SelectionData
+{
+    public static IntPtr DataSetUris2(this IntPtr data, string[] uris)
+    {
+        var intptrs = uris.Select(n => Marshal.StringToCoTaskMemUTF8(Uri.EscapeDataString(n).Replace("%2F", "/").Replace("%3A", ":"))).ToArray();
+        var result = DataSetUris2(data, intptrs);
+        intptrs.ForEach(n => Marshal.FreeCoTaskMem(n));
+        return result;
+    }
+
+    [DllImport("libgtk-3.so", EntryPoint = "gtk_selection_data_set_uris", CallingConvention = CallingConvention.Cdecl)]
+    extern static IntPtr DataSetUris2(this IntPtr data, IntPtr[] uris);
 }

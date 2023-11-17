@@ -16,13 +16,15 @@ btn1.onclick = async () => {
     console.log("cmd1", res)
 }
 
-webViewRegisterDragEnd(() => console.log("Dräg ended"))
+const cb = () => console.log("Drag ended")
 
 const onDragStart = evt => { 
-    webViewDragStart(["file:///home/uwe/test"])
+    webViewRegisterDragEnd(cb)
+    webViewDragStart(["/home/uwe/test", "/home/uwe/Canon/Äüö.JPG"])
     evt.preventDefault()
 }
 
 dr.onmousedown = onDragStart
+
 
 
