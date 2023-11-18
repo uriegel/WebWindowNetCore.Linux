@@ -8,13 +8,14 @@ StartEvents(sseEventSource.Send);
 
 WebView
     .Create()
+    .SetAppId("de.uriegel.test.linux")
     .InitialBounds(600, 800)
     .ResourceIcon("icon")
-    .Title("Commander")
+    .Title("Linux Tester")
     .QueryString(() => $"?theme={Application.Dispatch(() => GtkSettings.GetDefault().GetString("gtk-theme-name")).Result}")
     .SaveBounds()
     .DefaultContextMenuEnabled()
-    .OnStarted(() => Console.WriteLine("Now started"))
+    .OnStarted(() => Console.WriteLine("Now really started"))
     //.DebugUrl("http://localhost:3000")
     .Url($"file://{Directory.GetCurrentDirectory()}/webroot/index.html")
     .ConfigureHttp(http => http
@@ -29,7 +30,7 @@ WebView
     .DebuggingEnabled()
 #endif            
     .Build()
-    .Run("de.uriegel.Commander");    
+    .Run();    
 
 void StartEvents(Action<Event> onChanged)   
 {
