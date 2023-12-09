@@ -17,7 +17,7 @@ WebView
     .DefaultContextMenuEnabled()
     .OnStarted(() => Console.WriteLine("Now really started"))
     //.DebugUrl("http://localhost:3000")
-    .Url($"file://{Directory.GetCurrentDirectory()}/webroot/index.html")
+    //.Url($"file://{Directory.GetCurrentDirectory()}/webroot/index.html")
     .ConfigureHttp(http => http
         .ResourceWebroot("webroot", "/web")
         .UseSse("sse/test", sseEventSource)
@@ -25,6 +25,7 @@ WebView
             context
                 .SideEffect(c => Console.WriteLine("Range request"))
             .StreamRangeFile("/home/uwe/Videos/Buster Keaton - Sherlock Jr..mp4"))        
+        .JsonPost<Msg, MsgResult>("request/cmd1", OnMsg)            
         .Build())
 #if DEBUG            
     .DebuggingEnabled()
@@ -48,7 +49,13 @@ void StartEvents(Action<Event> onChanged)
         }.Start();   
 }
 
+Task<MsgResult> OnMsg(Msg msg)
+    => Task.FromResult(new MsgResult("The result"));
+
 record Event(string Content);
+
+record Msg(string Text, int Id);
+record MsgResult(string Text);
 
 // TODO https://webkitgtk.org/reference/webkit2gtk/2.28.2/WebKitURISchemeRequest.html
 // TODO Windows Version: https://learn.microsoft.com/en-us/dotnet/api/microsoft.web.webview2.core.corewebview2.webresourcerequested?view=webview2-dotnet-1.0.1587.40
