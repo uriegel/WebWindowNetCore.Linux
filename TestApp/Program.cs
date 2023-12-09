@@ -1,7 +1,7 @@
 ﻿using LinqTools;
 using AspNetExtensions;
-using WebWindowNetCore;
 using GtkDotNet;
+using WebWindowNetCore;
 
 var sseEventSource = WebView.CreateEventSource<Event>();
 StartEvents(sseEventSource.Send);
@@ -12,7 +12,7 @@ WebView
     .InitialBounds(600, 800)
     .ResourceIcon("icon")
     .Title("Linux Tester")
-    .QueryString(() => $"?theme={Application.Dispatch(() => GtkSettings.GetDefault().GetString("gtk-theme-name")).Result}")
+    .QueryString(() => $"?theme={Gtk.Dispatch(() => GtkSettings.GetDefault().GetString("gtk-theme-name")).Result}")
     .SaveBounds()
     .DefaultContextMenuEnabled()
     .OnStarted(() => Console.WriteLine("Now really started"))
