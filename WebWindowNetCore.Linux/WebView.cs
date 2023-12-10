@@ -6,6 +6,7 @@ using WebWindowNetCore.Data;
 using LinqTools;
 
 using static AspNetExtensions.Core;
+using GtkDotNet.SafeHandles;
 
 namespace WebWindowNetCore;
 
@@ -26,6 +27,8 @@ public class WebView : Base.WebView
             .OnActivate(app => app
                 .NewWindow()
                 .Title(settings.Title)
+                .SideEffectIf(setTitlebar != null,
+                    w => w.Titlebar(setTitlebar!()).SideEffect(_ => setTitlebar = null))
                 .SideEffectIf(settings.ResourceIcon != null,
                     w => w.ResourceIcon(settings.ResourceIcon!))
                 .SideEffectChoose(settings.SaveBounds,
@@ -96,8 +99,13 @@ public class WebView : Base.WebView
             .Run(0, 0);
 
     internal WebView(WebViewBuilder builder)
-        => settings = builder.Data;
+    {
+        settings = builder.Data;
+        setTitlebar = builder.setTitlebar;
+    }
+        
 
+    Func<WidgetHandle>? setTitlebar;
     delegate bool CloseDelegate(IntPtr z1, IntPtr z2);
     delegate bool BoolFunc();
     readonly WebViewSettings settings;

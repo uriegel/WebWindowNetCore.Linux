@@ -12,6 +12,12 @@ WebView
     .InitialBounds(600, 800)
     .ResourceIcon("icon")
     .Title("Linux Tester")
+    .DownCast<WebViewBuilder>()
+    .TitleBar(() => HeaderBar.New()
+                            .PackEnd(
+                                ToggleButton.New()
+                                .IconName("open-menu-symbolic")
+                            ))
     .QueryString(() => $"?theme={Gtk.Dispatch(() => GtkSettings.GetDefault().GetString("gtk-theme-name")).Result}")
     .SaveBounds()
     .DefaultContextMenuEnabled()
