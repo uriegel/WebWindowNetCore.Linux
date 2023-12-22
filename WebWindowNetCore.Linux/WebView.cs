@@ -51,6 +51,7 @@ public class WebView : Base.WebView
                             wk.AddController(
                             EventControllerKey
                                 .New()
+                                .RefSink()
                                 .OnKeyPressed((k, kc, m) => {
                                     if (kc == 73)
                                     {
