@@ -26,12 +26,7 @@ public class WebView : Base.WebView
             .New(settings.AppId)
             .OnActivate(app => app
                 .NewWindow()
-
-
-                .Title("settings.Title")
-
-
-
+                .Title(settings.Title)
                 .SideEffectIf(setTitlebar != null,
                     w => w.Titlebar(setTitlebar!()).SideEffect(_ => setTitlebar = null))
                 .SideEffectIf(settings.ResourceIcon != null,
@@ -57,20 +52,8 @@ public class WebView : Base.WebView
                             EventControllerKey
                                 .New()
                                 .OnKeyPressed((k, kc, m) => {
-
-
-
-                                    Console.WriteLine("Key pressed");
-
-
-
                                     if (kc == 73)
                                     {
-
-
-                                        Console.WriteLine("Key F7 pressed");
-
-
                                         // prevent blink_cb crash!
                                         wk.RunJavascript(
 """
@@ -79,7 +62,6 @@ public class WebView : Base.WebView
         code: "F7"
     })) 
 """);
-                                        Console.WriteLine("Key pressed true");
                                         return true;
                                     }
                                     else
