@@ -47,6 +47,26 @@ public class WebView : Base.WebView
                                 s => s.EnableDeveloperExtras = true))
                         .SideEffectIf(settings.DefaultContextMenuEnabled != true, webview => webview
                             .DisableContextMenu())
+                        .SideEffect(wk => 
+                            wk.AddController(
+                            EventControllerKey
+                                .New()
+                                .OnKeyPressed((k, kc, m) => {
+                                    if (kc == 73)
+                                    {
+                                        // prevent blink_cb crash!
+                                        wk.RunJavascript(
+"""
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+        key: "F7",
+        code: "F7"
+    })) 
+""");
+                                        return true;
+                                    }
+                                    else
+                                        return false;
+                                })))
                         .LoadUri(WebViewSettings.GetUri(settings))
                         .OnAlert((wk, msg) =>
                         {
