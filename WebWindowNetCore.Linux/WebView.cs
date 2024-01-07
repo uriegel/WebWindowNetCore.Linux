@@ -111,7 +111,8 @@ public class WebView : Base.WebView
                 )
                 .SideEffectIf(settings.SaveBounds == true,
                     w => w.OnClose(_ =>
-                        false.SideEffect(_ =>
+                        settings.CanClose != null && settings.CanClose() == false
+                        .SideEffect(_ =>
                             (Bounds.Retrieve(settings.AppId, new Bounds(null, null, settings.Width, settings.Height, null))
                                 with { IsMaximized = w.IsMaximized(), Width = w.GetWidth(), Height = w.GetHeight() })
                                     .Save(settings.AppId))

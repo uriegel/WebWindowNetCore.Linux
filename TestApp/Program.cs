@@ -22,6 +22,7 @@ WebView
     .SaveBounds()
     .DefaultContextMenuEnabled()
     .OnStarted(() => Console.WriteLine("Now really started"))
+    .OnClosing(() => true)
     .DebugUrl("http://localhost:5173")
     //.Url($"file://{Directory.GetCurrentDirectory()}/webroot/index.html")
     .ConfigureHttp(http => http
