@@ -25,8 +25,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Gtk4DotNet" Version="5.3.6" />
-    <PackageReference Include="WebWindowNetCore" Version="9.6.5" />
+    <PackageReference Include="Gtk4DotNet" Version="5.3.8" />
+    <PackageReference Include="WebWindowNetCore" Version="9.6.6" />
   </ItemGroup>
 
   <PropertyGroup>
