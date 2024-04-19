@@ -27,8 +27,6 @@ public class WebView : Base.WebView
             .OnActivate(app => app
                 .NewWindow()
                 .Title(settings.Title)
-                .SideEffectIf(setTitlebar != null,
-                    w => w.Titlebar(setTitlebar!()).SideEffect(_ => setTitlebar = null))
                 .SideEffectIf(settings.ResourceIcon != null,
                     w => w.ResourceIcon(settings.ResourceIcon!))
                 .SideEffectChoose(settings.SaveBounds,
@@ -42,6 +40,7 @@ public class WebView : Base.WebView
                     w => w.DefaultSize(settings.Width, settings.Height))
                 .Child(
                     WebKit.New()
+                        .Ref(webView)
                         .SideEffect(webview => webview.GetSettings()
                             .SideEffectIf(settings.DevTools == true,
                                 s => s.EnableDeveloperExtras = true))
@@ -117,8 +116,12 @@ public class WebView : Base.WebView
                                 with { IsMaximized = w.IsMaximized(), Width = w.GetWidth(), Height = w.GetHeight() })
                                     .Save(settings.AppId))
                     ))
+                .SideEffectIf(setTitlebar != null,
+                    w => w.Titlebar(setTitlebar!.Invoke(webView)).SideEffect(_ => setTitlebar = null))
                 .Show())
             .Run(0, 0);
+
+    static readonly ObjectRef<WebViewHandle> webView = new(); 
 
     internal WebView(WebViewBuilder builder)
     {
@@ -127,7 +130,7 @@ public class WebView : Base.WebView
     }
         
 
-    Func<WidgetHandle>? setTitlebar;
+    Func<ObjectRef<WebViewHandle>, WidgetHandle>? setTitlebar;
     delegate bool CloseDelegate(IntPtr z1, IntPtr z2);
     delegate bool BoolFunc();
     readonly WebViewSettings settings;
