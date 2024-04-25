@@ -22,7 +22,7 @@ public class WebView : Base.WebView
 
     public override int Run()
         => Application
-            .New(settings.AppId)
+            .NewAdwaita(settings.AppId)
             .OnActivate(app => app
                 .NewWindow()
                 .Title(settings.Title)
