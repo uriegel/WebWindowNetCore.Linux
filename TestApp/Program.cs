@@ -13,7 +13,7 @@ WebView
     .ResourceIcon("icon")
     .Title("Linux Tester")
     .DownCast<WebViewBuilder>()
-    .TitleBar(wv => HeaderBar.New()
+    .TitleBar((a, w, wv) => HeaderBar.New()
                             .PackEnd(
                                 ToggleButton.New()
                                 .IconName("open-menu-symbolic")

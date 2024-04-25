@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using System.Text.Json;
 
 using GtkDotNet;
@@ -117,7 +116,7 @@ public class WebView : Base.WebView
                                     .Save(settings.AppId))
                     ))
                 .SideEffectIf(setTitlebar != null,
-                    w => w.Titlebar(setTitlebar!.Invoke(webView)).SideEffect(_ => setTitlebar = null))
+                    w => w.Titlebar(setTitlebar!.Invoke(app, w, webView)).SideEffect(_ => setTitlebar = null))
                 .Show())
             .Run(0, 0);
 
@@ -130,7 +129,7 @@ public class WebView : Base.WebView
     }
         
 
-    Func<ObjectRef<WebViewHandle>, WidgetHandle>? setTitlebar;
+    Func<ApplicationHandle, WindowHandle, ObjectRef<WebViewHandle>, WidgetHandle>? setTitlebar;
     delegate bool CloseDelegate(IntPtr z1, IntPtr z2);
     delegate bool BoolFunc();
     readonly WebViewSettings settings;
