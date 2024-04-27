@@ -5,9 +5,9 @@
   	<RuntimeIdentifier>linux-x64</RuntimeIdentifier>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>6.0.0</Version>
-    <FileVersion>6.0.0.0</FileVersion>
-    <AssemblyVersion>6.0.0.0</AssemblyVersion>
+    <Version>6.1.0</Version>
+    <FileVersion>6.1.0.0</FileVersion>
+    <AssemblyVersion>6.1.0.0</AssemblyVersion>
     <Authors>Uwe Riegel</Authors>
     <Company>Uwe Riegel</Company>
     <Copyright>Uwe Riegel</Copyright>
@@ -25,7 +25,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Gtk4DotNet" Version="5.4.0" />
+    <PackageReference Include="Gtk4DotNet" Version="6.0.0" />
     <PackageReference Include="WebWindowNetCore" Version="9.6.6" />
   </ItemGroup>
 

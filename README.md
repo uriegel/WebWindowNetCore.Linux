@@ -1,6 +1,7 @@
 # WebWindowNetCore.Linux
 
 ## Prerequisites
+These prerequisites are nt neccesarily mandatory depending on the version of Linux
 
 ```
 sudo apt install libgtk-4-dev
