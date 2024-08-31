@@ -1,14 +1,11 @@
 # WebWindowNetCore.Linux
 
-## Prerequisites
-These prerequisites are nt neccesarily mandatory depending on the version of Linux
+This project is obsolete and development is stopped.
 
-```
-sudo apt install libgtk-4-dev
-sudo apt install libwebkitgtk-6.0-dev
-sudo apt install libadwaita-1-dev
-```
+Alternative:
 
-## Dependencies
-[WebWindowNetCore](https://github.com/uriegel/WebWindowNetCore/blob/master/README.md). Please look there for further information.
+Use project [WebWindowNetCore](https://github.com/uriegel/WebWindowNetCore), Nuget package [WebWindowNetCore](https://www.nuget.org/packages/WebWindowNetCore/)
+
+```WebWindowNetCore``` is the successor. You only have to use this package for Windows and Linux 
+
 
